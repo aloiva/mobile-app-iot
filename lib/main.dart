@@ -21,11 +21,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  globalPrefs = await PreferenceUtils.init();
 
   await Notifications().init();
+  await Future.delayed(const Duration(seconds: 1));
 
   // Initialize PreferenceUtils instance.
-  globalPrefs = await PreferenceUtils.init();
   runApp(const MyApp());
 }
 

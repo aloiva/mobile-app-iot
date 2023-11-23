@@ -53,6 +53,9 @@ class PreferenceUtils {
     PreferenceUtils.setString(AppSettingsKeys.notificationEndpoint, 'https://httpbin.org/status/200');
     PreferenceUtils.setString(UserSettingKeys.partnertoken,
         'dviwN03aQFiVATEsAjhLlg:APA91bG8FUeLdoNN5C5giumJ2j01yq8KIJngmjUrtGQOKiVOM9b2Jkh7PVbxNdyY7zHJ5XiyPmCFFrG6Srk729kLnqpUqkmsig2A2O_jB0-u8xryhdazee9uV-EXawfqJGjaUNEPk1ue');
+    PreferenceUtils.setString(AppSettingsKeys.authtoken,
+        'AAAAWNSMP2I:APA91bGJwr3S050cQZcsFqRmVzufsGV-AULUduAEEeFJxmkIoV703DItp3luf3A_JjbnXOLEqO3XsuN4BMu_V1DtEd0B0qMhGQdjTp8erWRm2Kzw3QAkmb3bS5BtTQV9yFx7FXmm1C33');
+    PreferenceUtils.setString(AppSettingsKeys.firebaseAPIURL, 'https://fcm.googleapis.com/fcm/send');
   }
 }
 
@@ -64,6 +67,8 @@ class AppSettingsKeys {
   static String imageEndpoint = "imageEndpoint";
   static String deviceRegisterEndpoint = "deviceRegisterEndpoint";
   static String notificationEndpoint = "notificationEndpoint";
+  static String firebaseAPIURL = "firebaseAPIURL";
+  static String authtoken = 'authtoken';
   // Private constructor to prevent instantiation
   AppSettingsKeys._();
 }
@@ -78,4 +83,5 @@ class UserSettingKeys {
   static String partnerusername = 'partnerusername';
   static String partnerimei = 'partnerimei';
   static String partnertoken = 'partnertoken';
+  static String org = 'org';
 }

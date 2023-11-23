@@ -3,7 +3,8 @@ import 'package:mobile_app/widgets/home_page/tab1_content.dart';
 import 'package:mobile_app/widgets/home_page/tab2_content.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final int? selectedPage;
+  const HomePage({super.key, this.selectedPage});
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +16,7 @@ class HomePage extends StatelessWidget {
         return exit;
       },
       child: DefaultTabController(
+        initialIndex: selectedPage ?? 0,
         length: 2,
         child: Scaffold(
           appBar: AppBar(

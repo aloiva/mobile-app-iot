@@ -33,35 +33,56 @@ class _SettingsPageState extends State<SettingsPage> {
                 color: Colors.blue,
                 icon: CupertinoIcons.profile_circled,
                 title: "Login Endpoint",
-                onTap: _updateloginEndpoint,
+                onTap: () => _updateKey(AppSettingsKeys.loginEndPoint),
               ),
               const SizedBox(height: 20),
               SettingsTile(
-                color: Colors.green,
+                color: const Color.fromARGB(255, 175, 170, 76),
                 icon: CupertinoIcons.profile_circled,
                 title: "Register Endpoint",
-                onTap: _updateregisterEndpoint,
+                onTap: () => _updateKey(AppSettingsKeys.registerEndpoint),
               ),
               const SizedBox(height: 20),
               SettingsTile(
                 color: const Color.fromARGB(255, 161, 204, 42),
                 icon: CupertinoIcons.device_phone_portrait,
                 title: "Device Registration Endpoint",
-                onTap: _updatedeviceRegisterEndpoint,
+                onTap: () => _updateKey(AppSettingsKeys.deviceRegisterEndpoint),
               ),
               const SizedBox(height: 20),
               SettingsTile(
                 color: Colors.black,
                 icon: CupertinoIcons.photo,
                 title: "Image Data Endpoint",
-                onTap: _updateimageEndpoint,
+                onTap: () => _updateKey(AppSettingsKeys.imageEndpoint),
               ),
               const SizedBox(height: 20),
               SettingsTile(
-                color: Colors.purple,
+                color: const Color.fromARGB(255, 39, 128, 176),
                 icon: CupertinoIcons.location,
                 title: "Location Data Endpoint",
-                onTap: _updatelocationEndpoint,
+                onTap: () => _updateKey(AppSettingsKeys.locationEndpoint),
+              ),
+              const SizedBox(height: 20),
+              SettingsTile(
+                color: Color.fromARGB(255, 19, 204, 41),
+                icon: CupertinoIcons.lock,
+                title: "Your Token",
+                onTap: () => _updateKey(UserSettingKeys.token),
+              ),
+              const SizedBox(height: 20),
+              SettingsTile(
+                color: Color.fromARGB(255, 168, 112, 224),
+                icon: CupertinoIcons.person_2_square_stack,
+                title: "Your Partner's Token",
+                onTap: () => _updateKey(UserSettingKeys.partnertoken),
+              ),
+              const SizedBox(height: 20),
+              SettingsTile(
+                color: const Color.fromARGB(255, 176, 39, 39),
+                icon: CupertinoIcons.lock_shield,
+                title: "Service Account Auth Token",
+                onTap: () => _updateKey(AppSettingsKeys.authtoken),
               ),
               const SizedBox(height: 20),
               // const Spacer(), // Add a Spacer to push the following widget to the bottom
@@ -114,14 +135,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _updateloginEndpoint() async {
-    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.loginEndPoint);
+  void _updateKey(String key) async {
+    _textFieldController.text = PreferenceUtils.getString(key);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('loginEndpoint'),
+          title: Text(key),
           content: TextField(
             controller: _textFieldController,
           ),
@@ -135,144 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  PreferenceUtils.setString(AppSettingsKeys.loginEndPoint, _textFieldController.text);
-                });
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _updateregisterEndpoint() async {
-    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.registerEndpoint);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('registerEndpoint'),
-          content: TextField(
-            controller: _textFieldController,
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Update the global variable with the text field value
-                setState(() {
-                  PreferenceUtils.setString(AppSettingsKeys.registerEndpoint, _textFieldController.text);
-                });
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _updateimageEndpoint() async {
-    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.imageEndpoint);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('imageEndpoint'),
-          content: TextField(
-            controller: _textFieldController,
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Update the global variable with the text field value
-                setState(() {
-                  PreferenceUtils.setString(AppSettingsKeys.imageEndpoint, _textFieldController.text);
-                });
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _updatelocationEndpoint() async {
-    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.locationEndpoint);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('locationEndpoint'),
-          content: TextField(
-            controller: _textFieldController,
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Update the global variable with the text field value
-                setState(() {
-                  PreferenceUtils.setString(AppSettingsKeys.locationEndpoint, _textFieldController.text);
-                });
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _updatedeviceRegisterEndpoint() async {
-    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.deviceRegisterEndpoint);
-    // .deviceRegisterEndpoint; // Set initial value in the text field
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('deviceRegisterEndpoint'),
-          content: TextField(
-            controller: _textFieldController,
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Update the global variable with the text field value
-                setState(() {
-                  PreferenceUtils.setString(AppSettingsKeys.deviceRegisterEndpoint, _textFieldController.text);
+                  PreferenceUtils.setString(key, _textFieldController.text);
                 });
                 Navigator.of(context).pop(); // Close the dialog
               },
