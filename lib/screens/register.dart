@@ -100,8 +100,8 @@ class _RegisterFormState extends State<RegisterForm> {
       Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
-        PreferenceUtils.setBool(UserDataKeys.isloggedin, true);
-        print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
+        PreferenceUtils.setBool(UserSettingKeys.isloggedin, true);
+        print(PreferenceUtils.getBool(UserSettingKeys.isloggedin));
 
         _showSuccess();
       } else {

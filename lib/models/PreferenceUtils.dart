@@ -50,6 +50,9 @@ class PreferenceUtils {
     PreferenceUtils.setString(AppSettingsKeys.locationEndpoint, 'https://httpbin.org/status/200');
     PreferenceUtils.setString(AppSettingsKeys.imageEndpoint, 'https://httpbin.org/status/200');
     PreferenceUtils.setString(AppSettingsKeys.deviceRegisterEndpoint, 'https://httpbin.org/status/200');
+    PreferenceUtils.setString(AppSettingsKeys.notificationEndpoint, 'https://httpbin.org/status/200');
+    PreferenceUtils.setString(UserSettingKeys.partnertoken,
+        'dviwN03aQFiVATEsAjhLlg:APA91bG8FUeLdoNN5C5giumJ2j01yq8KIJngmjUrtGQOKiVOM9b2Jkh7PVbxNdyY7zHJ5XiyPmCFFrG6Srk729kLnqpUqkmsig2A2O_jB0-u8xryhdazee9uV-EXawfqJGjaUNEPk1ue');
   }
 }
 
@@ -60,16 +63,19 @@ class AppSettingsKeys {
   static String locationEndpoint = "locationEndpoint";
   static String imageEndpoint = "imageEndpoint";
   static String deviceRegisterEndpoint = "deviceRegisterEndpoint";
+  static String notificationEndpoint = "notificationEndpoint";
   // Private constructor to prevent instantiation
   AppSettingsKeys._();
 }
 
-class UserDataKeys {
+class UserSettingKeys {
   static String isloggedin = 'isloggedin';
   static String isdeviceregistered = 'isregistered';
   static String username = 'username';
   static String password = 'password';
   static String imei = 'imei';
+  static String token = 'token';
   static String partnerusername = 'partnerusername';
   static String partnerimei = 'partnerimei';
+  static String partnertoken = 'partnertoken';
 }

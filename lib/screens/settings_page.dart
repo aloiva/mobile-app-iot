@@ -1,7 +1,9 @@
 // import 'dart:convert';
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:mobile_app/models/preferenceUtils.dart';
+import 'package:mobile_app/models/PreferenceUtils.dart';
 import 'package:mobile_app/widgets/settings_page/settings_tile.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -67,8 +69,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 alignment: Alignment.center,
                 child: ElevatedButton(
                   onPressed: () {
-                    print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
-                    if (PreferenceUtils.getBool(UserDataKeys.isloggedin) == true) {
+                    print(PreferenceUtils.getBool(UserSettingKeys.isloggedin));
+                    if (PreferenceUtils.getBool(UserSettingKeys.isloggedin) == true) {
                       _showLogoutConfirmationDialog();
                     }
                   },
@@ -100,8 +102,8 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 // Perform logout logic here
                 // For example, you can navigate to the login page
-                PreferenceUtils.setBool(UserDataKeys.isloggedin, false);
-                // print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
+                PreferenceUtils.setBool(UserSettingKeys.isloggedin, false);
+                // print(PreferenceUtils.getBool(UserSettingKeys.isloggedin));
                 Navigator.pushNamed(context, '/login');
               },
               child: const Text('Yes'),

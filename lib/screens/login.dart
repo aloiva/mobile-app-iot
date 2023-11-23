@@ -59,7 +59,7 @@ class LoginScreen extends StatelessWidget {
 }
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({Key? key}) : super(key: key);
+  const LoginForm({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -101,8 +101,8 @@ class _LoginFormState extends State<LoginForm> {
       Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
-        PreferenceUtils.setBool(UserDataKeys.isloggedin, true);
-        print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
+        PreferenceUtils.setBool(UserSettingKeys.isloggedin, true);
+        print(PreferenceUtils.getBool(UserSettingKeys.isloggedin));
         _showSuccess();
       } else {
         _showFailure();
