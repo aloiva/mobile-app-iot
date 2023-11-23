@@ -2,11 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// import 'package:mobile_app/screens/home_page.dart';
 import 'dart:convert';
-import 'package:mobile_app/models/app_config.dart';
-
-AppConfig globalAppConfig = AppConfig.initial();
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -15,26 +11,44 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Return false to block the back navigation
-        return false;
+        // Show the confirmation dialog when the back button is pressed
+        bool exit = await showExitConfirmationDialog(context);
+        return exit;
       },
       child: Scaffold(
-        appBar: AppBar(
-            title: const Text('Register'),
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  // Navigate to the settings route
-                  Navigator.pushNamed(context, '/settings');
-                },
-              ),
-            ]),
+        appBar: AppBar(title: const Text('Register'), automaticallyImplyLeading: false, actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              // Navigate to the settings route
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ]),
         body: const Padding(
           padding: EdgeInsets.all(16.0),
           child: RegisterForm(),
         ),
+      ),
+    );
+  }
+
+  Future<bool> showExitConfirmationDialog(BuildContext context) async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exit App'),
+        content: const Text('Do you want to exit the app?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
       ),
     );
   }
@@ -68,9 +82,11 @@ class _RegisterFormState extends State<RegisterForm> {
         context: context,
         builder: (BuildContext context) {
           return const AlertDialog(
-            title: Text('Registering...'),
-            content: CircularProgressIndicator(),
-          );
+              title: Text('Logging in...'),
+              content: LinearProgressIndicator(
+                backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
+              ));
         },
       );
 

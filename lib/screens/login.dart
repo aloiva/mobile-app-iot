@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// import 'package:mobile_app/screens/home_page.dart';
 import 'dart:convert';
-import 'package:mobile_app/models/app_config.dart';
 
-AppConfig globalAppConfig = AppConfig.initial();
+import 'package:mobile_app/models/PreferenceUtils.dart';
+// import 'package:mobile_app/screens/home_page.dart';
+// import 'package:mobile_app/models/app_config.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -15,26 +15,44 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Return false to block the back navigation
-        return false;
+        // Show the confirmation dialog when the back button is pressed
+        bool exit = await showExitConfirmationDialog(context);
+        return exit;
       },
       child: Scaffold(
-        appBar: AppBar(
-            title: const Text('Login'),
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  // Navigate to the settings route
-                  Navigator.pushNamed(context, '/settings');
-                },
-              ),
-            ]),
+        appBar: AppBar(title: const Text('Login'), automaticallyImplyLeading: false, actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              // Navigate to the settings route
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ]),
         body: const Padding(
           padding: EdgeInsets.all(16.0),
           child: LoginForm(),
         ),
+      ),
+    );
+  }
+
+  Future<bool> showExitConfirmationDialog(BuildContext context) async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exit App'),
+        content: const Text('Do you want to exit the app?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
       ),
     );
   }
@@ -53,7 +71,7 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController _passwordController = TextEditingController();
 
   void _login() async {
-    const String apiUrl = 'http://172.20.204.168:3000/send-data';
+    String apiUrl = PreferenceUtils.getString(AppSettingsKeys.loginEndPoint);
 
     Map<String, String> credentials = {
       'type': 'login',
@@ -64,14 +82,15 @@ class _LoginFormState extends State<LoginForm> {
     print(jsonString);
     try {
       showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return const AlertDialog(
-            title: Text('Logging in...'),
-            content: CircularProgressIndicator(),
-          );
-        },
-      );
+          context: context,
+          builder: (BuildContext context) {
+            return const AlertDialog(
+                title: Text('Logging in...'),
+                content: LinearProgressIndicator(
+                  backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
+                ));
+          });
 
       var response = await http.post(
         Uri.parse(apiUrl),
@@ -130,8 +149,8 @@ class _LoginFormState extends State<LoginForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(''),
-          content: const Text('Successfully logged in.'),
+          title: const Text('Successfully logged in.'),
+          // content: const Text(''),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -151,8 +170,7 @@ class _LoginFormState extends State<LoginForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(''),
-          content: const Text('Login failed. Please check your password.'),
+          title: const Text('Login failed. Please check your password.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

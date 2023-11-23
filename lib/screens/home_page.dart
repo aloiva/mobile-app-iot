@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/widgets/home_page/tab1_content.dart';
 import 'package:mobile_app/widgets/home_page/tab2_content.dart';
-import 'package:mobile_app/models/app_config.dart';
 
 class HomePage extends StatelessWidget {
-  final AppConfig appConfig;
-
-  const HomePage({Key? key, required this.appConfig}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +25,6 @@ class HomePage extends StatelessWidget {
               IconButton(
                   icon: const Icon(Icons.settings),
                   onPressed: () {
-                    // Navigate to the Settings Page
                     Navigator.pushNamed(context, '/settings');
                   }),
             ],

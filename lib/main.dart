@@ -3,11 +3,15 @@ import 'package:mobile_app/screens/login.dart';
 import 'package:mobile_app/screens/register.dart';
 import 'package:mobile_app/screens/home_page.dart'; // Replace with the actual path to your home page
 import 'package:mobile_app/screens/settings_page.dart'; // Replace with the actual path to your settings page
-import 'package:mobile_app/models/app_config.dart';
+// import 'package:mobile_app/models/app_config.dart';
+import 'package:mobile_app/models/PreferenceUtils.dart';
 
-AppConfig globalAppConfig = AppConfig.initial();
+void main() async {
+  // Required for async calls in `main`
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
+  // Initialize PreferenceUtils instance.
+  await PreferenceUtils.init();
   runApp(const MyApp());
 }
 
@@ -22,23 +26,20 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
-        '/home': (context) => HomePage(appConfig: globalAppConfig),
-        '/settings': (context) => SettingsPage(appConfig: globalAppConfig),
+        '/home': (context) => const HomePage(),
+        '/settings': (context) => const SettingsPage(),
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/home':
             return PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  HomePage(appConfig: settings.arguments as AppConfig),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
+              pageBuilder: (context, animation, secondaryAnimation) => const HomePage(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 const begin = 0.0;
                 const end = 5.0;
                 const curve = Curves.easeInOut;
 
-                var tween = Tween(begin: begin, end: end)
-                    .chain(CurveTween(curve: curve));
+                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
                 var opacityAnimation = animation.drive(tween);
 
@@ -51,8 +52,7 @@ class MyApp extends StatelessWidget {
           // Add more cases for other routes as needed
           default:
             // Handle unknown route
-            return MaterialPageRoute(
-                builder: (context) => HomePage(appConfig: globalAppConfig));
+            return MaterialPageRoute(builder: (context) => const HomePage());
         }
       },
     );

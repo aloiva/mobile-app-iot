@@ -1,13 +1,11 @@
 // import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mobile_app/models/preferenceUtils.dart';
 import 'package:mobile_app/widgets/settings_page/settings_tile.dart';
-import 'package:mobile_app/models/app_config.dart'; // Import the AppConfig model
 
 class SettingsPage extends StatefulWidget {
-  final AppConfig appConfig; // Pass AppConfig to the SettingsPage
-
-  const SettingsPage({Key? key, required this.appConfig}) : super(key: key);
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -100,6 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 // Perform logout logic here
                 // For example, you can navigate to the login page
+                PreferenceUtils.setBool(UserDataKeys.isloggedin, false);
                 Navigator.pushNamed(context, '/login');
               },
               child: const Text('Yes'),
@@ -111,8 +110,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _updateloginEndpoint() async {
-    _textFieldController.text =
-        widget.appConfig.loginEndPoint; // Set initial value in the text field
+    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.loginEndPoint);
 
     showDialog(
       context: context,
@@ -131,9 +129,8 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             TextButton(
               onPressed: () {
-                // Update the global variable with the text field value
                 setState(() {
-                  widget.appConfig.loginEndPoint = _textFieldController.text;
+                  PreferenceUtils.setString(AppSettingsKeys.loginEndPoint, _textFieldController.text);
                 });
                 Navigator.of(context).pop(); // Close the dialog
               },
@@ -146,8 +143,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _updateregisterEndpoint() async {
-    _textFieldController.text = widget
-        .appConfig.registerEndpoint; // Set initial value in the text field
+    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.registerEndpoint);
 
     showDialog(
       context: context,
@@ -168,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 // Update the global variable with the text field value
                 setState(() {
-                  widget.appConfig.registerEndpoint = _textFieldController.text;
+                  PreferenceUtils.setString(AppSettingsKeys.registerEndpoint, _textFieldController.text);
                 });
                 Navigator.of(context).pop(); // Close the dialog
               },
@@ -181,8 +177,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _updateimageEndpoint() async {
-    _textFieldController.text =
-        widget.appConfig.imageEndpoint; // Set initial value in the text field
+    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.imageEndpoint);
 
     showDialog(
       context: context,
@@ -203,7 +198,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 // Update the global variable with the text field value
                 setState(() {
-                  widget.appConfig.imageEndpoint = _textFieldController.text;
+                  PreferenceUtils.setString(AppSettingsKeys.imageEndpoint, _textFieldController.text);
                 });
                 Navigator.of(context).pop(); // Close the dialog
               },
@@ -216,8 +211,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _updatelocationEndpoint() async {
-    _textFieldController.text = widget
-        .appConfig.locationEndpoint; // Set initial value in the text field
+    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.locationEndpoint);
 
     showDialog(
       context: context,
@@ -238,7 +232,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 // Update the global variable with the text field value
                 setState(() {
-                  widget.appConfig.locationEndpoint = _textFieldController.text;
+                  PreferenceUtils.setString(AppSettingsKeys.locationEndpoint, _textFieldController.text);
                 });
                 Navigator.of(context).pop(); // Close the dialog
               },
@@ -251,8 +245,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _updatedeviceRegisterEndpoint() async {
-    _textFieldController.text = widget.appConfig
-        .deviceRegisterEndpoint; // Set initial value in the text field
+    _textFieldController.text = PreferenceUtils.getString(AppSettingsKeys.deviceRegisterEndpoint);
+    // .deviceRegisterEndpoint; // Set initial value in the text field
 
     showDialog(
       context: context,
@@ -273,8 +267,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 // Update the global variable with the text field value
                 setState(() {
-                  widget.appConfig.deviceRegisterEndpoint =
-                      _textFieldController.text;
+                  PreferenceUtils.setString(AppSettingsKeys.deviceRegisterEndpoint, _textFieldController.text);
                 });
                 Navigator.of(context).pop(); // Close the dialog
               },

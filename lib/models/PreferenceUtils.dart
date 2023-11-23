@@ -1,15 +1,16 @@
-// ignore: file_names
+// ignore_for_file: file_names
+
 import 'dart:async' show Future;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceUtils {
   static SharedPreferences? _prefsInstance;
-  static Future<SharedPreferences> get _instance async =>
-      _prefsInstance ??= await SharedPreferences.getInstance();
+  static Future<SharedPreferences> get _instance async => _prefsInstance ??= await SharedPreferences.getInstance();
 
   // call this method from iniState() function of mainApp().
   static Future<Object> init() async {
     _prefsInstance = await _instance;
+    setDefaults();
     return _prefsInstance ?? '';
   }
 
@@ -29,6 +30,14 @@ class PreferenceUtils {
 
   static Future<bool> setBool(String key, bool value) async {
     return _prefsInstance?.setBool(key, value) ?? Future(() => false);
+  }
+
+  static void setDefaults() {
+    PreferenceUtils.setString(AppSettingsKeys.loginEndPoint, 'https://httpbin.org/status/200');
+    PreferenceUtils.setString(AppSettingsKeys.registerEndpoint, 'https://httpbin.org/status/200');
+    PreferenceUtils.setString(AppSettingsKeys.locationEndpoint, 'https://httpbin.org/status/200');
+    PreferenceUtils.setString(AppSettingsKeys.imageEndpoint, 'https://httpbin.org/status/200');
+    PreferenceUtils.setString(AppSettingsKeys.deviceRegisterEndpoint, 'https://httpbin.org/status/200');
   }
 }
 
