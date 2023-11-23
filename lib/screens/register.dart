@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:mobile_app/models/PreferenceUtils.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -68,7 +69,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   // ignore: non_constant_identifier_names
   void _Register() async {
-    const String apiUrl = 'http://192.168.3.237:3000/send-data';
+    String apiUrl = PreferenceUtils.getString(AppSettingsKeys.registerEndpoint);
 
     Map<String, String> credentials = {
       'type': 'Register',
@@ -82,7 +83,7 @@ class _RegisterFormState extends State<RegisterForm> {
         context: context,
         builder: (BuildContext context) {
           return const AlertDialog(
-              title: Text('Logging in...'),
+              title: Text('Registering...'),
               content: LinearProgressIndicator(
                 backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
@@ -99,6 +100,9 @@ class _RegisterFormState extends State<RegisterForm> {
       Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
+        PreferenceUtils.setBool(UserDataKeys.isloggedin, true);
+        print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
+
         _showSuccess();
       } else {
         _showFailure();
@@ -147,8 +151,8 @@ class _RegisterFormState extends State<RegisterForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(''),
-          content: const Text('Successfully registered user.. now logging in.'),
+          title: const Text('Registration successful.'),
+          content: const Text('You will be logged in now.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -189,7 +193,7 @@ class _RegisterFormState extends State<RegisterForm> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Register Confirmation'),
-          content: const Text('Are you sure you want to log in?'),
+          content: const Text('Are you sure you want to register?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

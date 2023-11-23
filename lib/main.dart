@@ -5,13 +5,20 @@ import 'package:mobile_app/screens/home_page.dart'; // Replace with the actual p
 import 'package:mobile_app/screens/settings_page.dart'; // Replace with the actual path to your settings page
 // import 'package:mobile_app/models/app_config.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+SharedPreferences? globalPrefs;
 
 void main() async {
   // Required for async calls in `main`
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize PreferenceUtils instance.
-  await PreferenceUtils.init();
+  globalPrefs = await PreferenceUtils.init();
+  // PreferenceUtils.setBool(UserDataKeys.isloggedin, false);
+  print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
+  print(PreferenceUtils.getString(AppSettingsKeys.deviceRegisterEndpoint));
+  print(PreferenceUtils.getString(AppSettingsKeys.loginEndPoint));
   runApp(const MyApp());
 }
 
@@ -22,7 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My App',
-      initialRoute: '/login', // Set the initial route to the login page
+      initialRoute: PreferenceUtils.getBool(UserDataKeys.isloggedin) == true ? '/home' : '/login', // Set the initial route to the login page
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),

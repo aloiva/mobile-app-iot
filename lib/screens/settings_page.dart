@@ -67,8 +67,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 alignment: Alignment.center,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate back to the login page
-                    _showLogoutConfirmationDialog();
+                    print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
+                    if (PreferenceUtils.getBool(UserDataKeys.isloggedin) == true) {
+                      _showLogoutConfirmationDialog();
+                    }
                   },
                   child: const Text('Logout'),
                 ),
@@ -99,6 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 // Perform logout logic here
                 // For example, you can navigate to the login page
                 PreferenceUtils.setBool(UserDataKeys.isloggedin, false);
+                // print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
                 Navigator.pushNamed(context, '/login');
               },
               child: const Text('Yes'),

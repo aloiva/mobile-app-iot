@@ -101,6 +101,8 @@ class _LoginFormState extends State<LoginForm> {
       Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
+        PreferenceUtils.setBool(UserDataKeys.isloggedin, true);
+        print(PreferenceUtils.getBool(UserDataKeys.isloggedin));
         _showSuccess();
       } else {
         _showFailure();
@@ -149,7 +151,7 @@ class _LoginFormState extends State<LoginForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Successfully logged in.'),
+          title: const Text('Login Succesful.'),
           // content: const Text(''),
           actions: <Widget>[
             TextButton(

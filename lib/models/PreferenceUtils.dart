@@ -2,34 +2,46 @@
 
 import 'dart:async' show Future;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_app/main.dart';
 
 class PreferenceUtils {
   static SharedPreferences? _prefsInstance;
-  static Future<SharedPreferences> get _instance async => _prefsInstance ??= await SharedPreferences.getInstance();
-
+  // static Future<SharedPreferences> get _instance async => _prefsInstance ??= await SharedPreferences.getInstance();
   // call this method from iniState() function of mainApp().
-  static Future<Object> init() async {
-    _prefsInstance = await _instance;
+  static Future<SharedPreferences> init() async {
+    _prefsInstance = await SharedPreferences.getInstance();
     setDefaults();
-    return _prefsInstance ?? '';
+    return _prefsInstance!;
   }
 
   static String getString(String key, [String? defValue]) {
-    return _prefsInstance?.getString(key) ?? defValue ?? "";
+    _prefsInstance ??= globalPrefs!;
+    var res = _prefsInstance!.getString(key) ?? defValue ?? "";
+    globalPrefs = _prefsInstance;
+    return res;
   }
 
   static bool getBool(String key) {
-    return _prefsInstance?.getBool(key) ?? false;
+    _prefsInstance ??= globalPrefs!;
+    var res = _prefsInstance!.getBool(key) ?? false;
+    globalPrefs = _prefsInstance;
+    return res;
   }
 
   static Future<bool> setString(String key, String value) async {
-    // var prefs = await _instance;
-    // return prefs.setString(key, value);
-    return _prefsInstance?.setString(key, value) ?? Future(() => false);
+    _prefsInstance ??= globalPrefs!;
+    //   var prefs = await _instance;
+    //   return prefs.setString(key, value);
+    var res = _prefsInstance!.setString(key, value);
+    globalPrefs = _prefsInstance;
+    return res;
   }
 
   static Future<bool> setBool(String key, bool value) async {
-    return _prefsInstance?.setBool(key, value) ?? Future(() => false);
+    _prefsInstance ??= globalPrefs!;
+    var res = _prefsInstance!.setBool(key, value);
+    globalPrefs = _prefsInstance;
+    return res;
   }
 
   static void setDefaults() {
