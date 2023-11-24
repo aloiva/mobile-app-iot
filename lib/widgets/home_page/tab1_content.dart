@@ -1,8 +1,9 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unused_import
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
+import 'package:mobile_app/services/checkPermissions.dart';
 
 class Tab1Content extends StatefulWidget {
   const Tab1Content({super.key});
@@ -33,7 +34,7 @@ class _Tab1ContentState extends State<Tab1Content> {
     );
   }
 
-  Widget _buildChildItemWithCopy(String text, IconData icon) {
+  Widget _buildChildItemWithCopy(String text, [IconData? icon]) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -64,6 +65,7 @@ class _Tab1ContentState extends State<Tab1Content> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
@@ -71,13 +73,19 @@ class _Tab1ContentState extends State<Tab1Content> {
                 leading: const Icon(Icons.star),
                 title: const Text('Permissions Overview'),
                 children: <Widget>[
-                  _buildChildItem('Camera Access'),
-                  _buildChildItem('Notifications Access'),
-                  _buildChildItem('Location Access'),
+                  const SizedBox(height: 5),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/check_permissions');
+                    },
+                    child: const Text('Recheck permissions.'),
+                  ),
+                  const SizedBox(height: 5),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
@@ -85,11 +93,14 @@ class _Tab1ContentState extends State<Tab1Content> {
                 leading: const Icon(Icons.star),
                 title: const Text('Partner Registration Status'),
                 children: <Widget>[
-                  _buildChildItem('Registered', Icons.redo_outlined),
+                  PreferenceUtils.getBool(UserSettingKeys.isdeviceregistered)
+                      ? _buildChildItem('Registered', Icons.check)
+                      : _buildChildItem('Unregistered', Icons.close),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
@@ -100,6 +111,7 @@ class _Tab1ContentState extends State<Tab1Content> {
               ),
             ),
           ),
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
@@ -112,6 +124,7 @@ class _Tab1ContentState extends State<Tab1Content> {
               ),
             ),
           ),
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
@@ -124,6 +137,7 @@ class _Tab1ContentState extends State<Tab1Content> {
               ),
             ),
           ),
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
@@ -136,6 +150,7 @@ class _Tab1ContentState extends State<Tab1Content> {
               ),
             ),
           ),
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
