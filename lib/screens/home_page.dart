@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_app/widgets/home_page/tab1_content.dart';
 import 'package:mobile_app/widgets/home_page/tab2_content.dart';
 
@@ -63,7 +64,7 @@ class HomePage extends StatelessWidget {
             child: const Text('No'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => SystemNavigator.pop(),
             child: const Text('Yes'),
           ),
         ],
