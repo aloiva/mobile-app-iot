@@ -1,8 +1,12 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:mobile_app/services/notifications.dart';
 // import 'dart:async';
 // import 'package:mobile_app/services/notifications.dart';
 // import 'package:http/http.dart' as http;
@@ -17,6 +21,19 @@ class Tab2Content extends StatefulWidget {
 
 class _Tab2ContentState extends State<Tab2Content> {
   bool isRegistered = true;
+  String lastlocation = '';
+  DateTime lastupdatedtime = DateTime.now();
+  var updatestatus;
+  bool isupdatestatusloading = false;
+  bool istheirlocloading = false;
+  bool isyourlocloading = false;
+
+  // your location details
+  var latitude = null, longitude = null, speed = null, accuracy = null, altitude = null;
+
+  // partner location details
+  var olat = null, olon = null, ospeed = null, oacc = null, oalt = null;
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +64,7 @@ class _Tab2ContentState extends State<Tab2Content> {
     );
   }
 
-  Widget _buildChildItemWithCopy(String text, IconData icon) {
+  Widget _buildChildItemWithCopy(String text, [IconData? icon]) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -147,29 +164,145 @@ class _Tab2ContentState extends State<Tab2Content> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // your partners device details
+          const SizedBox(height: 10),
           Card(
             child: Padding(
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
               child: ExpansionTile(
                 leading: const Icon(Icons.star),
-                title: const Text('Permissions Overview'),
+                title: const Text('Your partner\'s device details'),
                 children: <Widget>[
-                  _buildChildItem('Camera Access'),
-                  _buildChildItem('Notifications Access'),
-                  _buildChildItem('Location Access'),
+                  _buildChildItemWithCopy('Username: ${PreferenceUtils.getString(PartnerSettingKeys.partnerusername)}'),
+                  _buildChildItemWithCopy('Token: ${PreferenceUtils.getString(PartnerSettingKeys.partnertoken)}'),
                 ],
               ),
             ),
           ),
+
+          // partner's last location
+          const SizedBox(height: 10),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('Your partner\'s last location'),
+                children: <Widget>[
+                  if (istheirlocloading)
+                    const LinearProgressIndicator(
+                      backgroundColor: Colors.grey,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                  _buildChildItemWithCopy('Latitude: $olat'),
+                  _buildChildItemWithCopy('Longitude: $olon'),
+                  _buildChildItemWithCopy('Altitude: $oalt'),
+                  _buildChildItemWithCopy('Speed: $ospeed'),
+                  _buildChildItemWithCopy('Accuracy: $oacc'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton(
+              onPressed: () {
+                _handleTheirLocation();
+              },
+              child: const Text('Update Partner\'s last location.'),
+            ),
+            const SizedBox(width: 10),
+            if (istheirlocloading) CircularProgressIndicator(),
+          ]),
+
+          // your last location
+          const SizedBox(height: 10),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('Your last location'),
+                children: <Widget>[
+                  if (isyourlocloading)
+                    const LinearProgressIndicator(
+                      backgroundColor: Colors.grey,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                  _buildChildItemWithCopy('Latitude: $latitude'),
+                  _buildChildItemWithCopy('Longitude: $longitude'),
+                  _buildChildItemWithCopy('Altitude: $altitude'),
+                  _buildChildItemWithCopy('Speed: $speed'),
+                  _buildChildItemWithCopy('Accuracy: $accuracy'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton(
+              onPressed: () {
+                _handleYourLoc();
+              },
+              child: const Text('Update your location'),
+            ),
+            const SizedBox(width: 10),
+            if (isyourlocloading) CircularProgressIndicator(),
+          ]),
+
+          // status of last update
+          const SizedBox(height: 10),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('Status of Your last Update'),
+                children: <Widget>[
+                  if (isupdatestatusloading)
+                    const LinearProgressIndicator(
+                      backgroundColor: Colors.grey,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                  _buildChildItemWithCopy('Last updated: $lastupdatedtime'),
+                  _buildChildItemWithCopy('status: $updatestatus'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton(
+              onPressed: () {
+                _handleUpdate();
+              },
+              child: const Text('Send update to your Partner'),
+            ),
+            const SizedBox(width: 10),
+            if (isupdatestatusloading) CircularProgressIndicator(),
+            // Container(
+            //   width: 20,
+            //   height: 20,
+            //   if (isupdatestatusloading) CircularProgressIndicator() ,
+            // decoration: BoxDecoration(
+            //   shape: BoxShape.circle,
+            //   color: isupdatestatusloading ? Colors.green : Colors.red,
+            // ),
+            // margin: const EdgeInsets.only(left: 5),
+          ]),
+
+          // unregister button
+          const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
               setState(() {
                 // Toggle the boolean value
-                isRegistered = true;
+                isRegistered = false;
               });
             },
             child: const Text('Unregister this Partner.'),
-          )
+          ),
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -177,11 +310,8 @@ class _Tab2ContentState extends State<Tab2Content> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        isRegistered ? _buildViewOne(context) : _buildViewTwo(context),
-      ],
+    return SingleChildScrollView(
+      child: isRegistered ? _buildViewTwo(context) : _buildViewOne(context),
     );
   }
 
@@ -232,5 +362,104 @@ class _Tab2ContentState extends State<Tab2Content> {
         content: Text('Copied to clipboard: $text'),
       ),
     );
+  }
+
+  void _handleUpdate() async {
+    setState(() {
+      isupdatestatusloading = true;
+    });
+    var response = await Notifications.sendUpdate();
+    // send the above data to location-endpoint.
+    var pos = await _determinePosition();
+    final String url = PreferenceUtils.getString(AppSettingsKeys.locationEndpoint);
+    final Map<String, dynamic> jsonData = {
+      'latitude': '${pos.latitude}',
+      'longitude': '${pos.longitude}',
+      'speed': '${pos.speed}',
+      'accuracy': '${pos.accuracy}',
+      'altitude': '${pos.altitude}'
+    };
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(jsonData),
+      );
+      if (response.statusCode == 200) {
+        print('Request successful');
+        print('Response: ${response.body}');
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+    setState(() {
+      updatestatus = response["success"] == true ? 'success' : 'failed. please check partner\'s token and re register';
+      lastupdatedtime = DateTime.now();
+      latitude = pos.latitude;
+      longitude = pos.longitude;
+      speed = pos.speed;
+      accuracy = pos.accuracy;
+      altitude = pos.altitude;
+      isyourlocloading = false;
+      isupdatestatusloading = false;
+    });
+  }
+
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
+
+  void _handleTheirLocation() {}
+
+  void _handleYourLoc() async {
+    setState(() {
+      isyourlocloading = true;
+    });
+    var pos = await _determinePosition();
+
+    setState(() {
+      latitude = pos.latitude;
+      longitude = pos.longitude;
+      speed = pos.speed;
+      accuracy = pos.accuracy;
+      altitude = pos.altitude;
+      isyourlocloading = false;
+    });
   }
 }
