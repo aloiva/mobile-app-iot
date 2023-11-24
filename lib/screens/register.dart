@@ -56,7 +56,7 @@ class RegisterScreen extends StatelessWidget {
 }
 
 class RegisterForm extends StatefulWidget {
-  const RegisterForm({Key? key}) : super(key: key);
+  const RegisterForm({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
