@@ -7,7 +7,7 @@ import 'package:mobile_app/models/PreferenceUtils.dart';
 import 'package:mobile_app/widgets/settings_page/settings_tile.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -23,11 +23,9 @@ class _SettingsPageState extends State<SettingsPage> {
         title: const Text('Settings'),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const SizedBox(height: 20),
               SettingsTile(
                 color: Colors.blue,
@@ -51,32 +49,46 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 20),
               SettingsTile(
-                color: Colors.black,
-                icon: CupertinoIcons.photo,
-                title: "Image Data Endpoint",
-                onTap: () => _updateKey(AppSettingsKeys.imageEndpoint),
-              ),
-              const SizedBox(height: 20),
-              SettingsTile(
-                color: const Color.fromARGB(255, 39, 128, 176),
+                color: const Color.fromARGB(255, 174, 140, 73),
                 icon: CupertinoIcons.location,
                 title: "Location Data Endpoint",
                 onTap: () => _updateKey(AppSettingsKeys.locationEndpoint),
               ),
               const SizedBox(height: 20),
               SettingsTile(
-                color: Color.fromARGB(255, 19, 204, 41),
-                icon: CupertinoIcons.lock,
-                title: "Your Token",
-                onTap: () => _updateKey(UserSettingKeys.token),
+                color: const Color.fromARGB(255, 144, 137, 137),
+                icon: CupertinoIcons.photo,
+                title: "Image Data Endpoint",
+                onTap: () => _updateKey(AppSettingsKeys.imageEndpoint),
               ),
               const SizedBox(height: 20),
               SettingsTile(
-                color: Color.fromARGB(255, 168, 112, 224),
-                icon: CupertinoIcons.person_2_square_stack,
-                title: "Your Partner's Token",
-                onTap: () => _updateKey(UserSettingKeys.partnertoken),
+                color: const Color.fromARGB(255, 94, 176, 39),
+                icon: CupertinoIcons.exclamationmark_shield_fill,
+                title: "Stolen Device Notifs Endpoint",
+                onTap: () => _updateKey(AppSettingsKeys.stolenNotificationEndpoint),
               ),
+              const SizedBox(height: 20),
+              SettingsTile(
+                color: const Color.fromARGB(255, 176, 39, 171),
+                icon: CupertinoIcons.arrow_up_circle_fill,
+                title: "Update Sent Notifs Endpoint",
+                onTap: () => _updateKey(AppSettingsKeys.updatedNotificationEndpoint),
+              ),
+              // const SizedBox(height: 20),
+              // SettingsTile(
+              //   color: Color.fromARGB(255, 19, 204, 41),
+              //   icon: CupertinoIcons.lock,
+              //   title: "Your Token",
+              //   onTap: () => _updateKey(UserSettingKeys.token),
+              // ),
+              // const SizedBox(height: 20),
+              // SettingsTile(
+              //   color: Color.fromARGB(255, 168, 112, 224),
+              //   icon: CupertinoIcons.person_2_square_stack,
+              //   title: "Your Partner's Token",
+              //   onTap: () => _updateKey(PartnerSettingKeys.partnertoken),
+              // ),
               const SizedBox(height: 20),
               SettingsTile(
                 color: const Color.fromARGB(255, 176, 39, 39),
@@ -86,21 +98,34 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 20),
               // const Spacer(), // Add a Spacer to push the following widget to the bottom
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton(
-                  onPressed: () {
-                    print(PreferenceUtils.getBool(UserSettingKeys.isloggedin));
-                    if (PreferenceUtils.getBool(UserSettingKeys.isloggedin) == true) {
-                      _showLogoutConfirmationDialog();
-                    }
-                  },
-                  child: const Text('Logout'),
-                ),
+              Row(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        print(PreferenceUtils.getBool(UserSettingKeys.isloggedin));
+                        if (PreferenceUtils.getBool(UserSettingKeys.isloggedin) == true) {
+                          _showLogoutConfirmationDialog();
+                        }
+                      },
+                      child: const Text('Logout'),
+                    ),
+                  ),
+                  const Spacer(), // Add a Spacer to push the following widget to the bottom
+                  Align(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        PreferenceUtils.setDefaults();
+                        _showSuccess(context, "reset to defaults.");
+                      },
+                      child: const Text('Reset All'),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ])),
       ),
     );
   }
@@ -161,6 +186,25 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.of(context).pop(); // Close the dialog
               },
               child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccess(BuildContext context, String text) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Successfully $text'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Okay'),
             ),
           ],
         );
