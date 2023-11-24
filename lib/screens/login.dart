@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 import 'dart:convert';
 
 import 'package:mobile_app/models/PreferenceUtils.dart';
@@ -49,7 +50,7 @@ class LoginScreen extends StatelessWidget {
             child: const Text('No'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => SystemNavigator.pop(),
             child: const Text('Yes'),
           ),
         ],
@@ -69,7 +70,9 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  String selectedProvider = 'Jio';
 
+  List<String> providerList = ['Jio', 'Airtel', 'Vi', 'Other'];
   void _login() async {
     String apiUrl = PreferenceUtils.getString(AppSettingsKeys.loginEndPoint);
 
@@ -77,6 +80,7 @@ class _LoginFormState extends State<LoginForm> {
       'type': 'login',
       'username': _usernameController.text,
       'password': _passwordController.text,
+      'carrier': selectedProvider,
     };
     String jsonString = jsonEncode(credentials);
     print(jsonString);
@@ -128,6 +132,21 @@ class _LoginFormState extends State<LoginForm> {
           controller: _passwordController,
           obscureText: true,
           decoration: const InputDecoration(labelText: 'Password'),
+        ),
+        const SizedBox(height: 16.0),
+        DropdownButton<String>(
+          value: selectedProvider,
+          onChanged: (String? newValue) {
+            setState(() {
+              selectedProvider = newValue!;
+            });
+          },
+          items: providerList.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
         ),
         const SizedBox(height: 16.0),
         ElevatedButton(
