@@ -32,8 +32,8 @@ class Notifications {
     // );
   }
 
-  static Future<int> sendUpdate() async {
-    final url = PreferenceUtils.getString(AppSettingsKeys.firebaseAPIURL);
+  static Future<Map<String, dynamic>> sendUpdate() async {
+    final url = PreferenceUtils.getString(AppSettingsKeys.updatedNotificationEndpoint);
 
     final headers = {
       'Content-Type': 'application/json',
@@ -41,13 +41,13 @@ class Notifications {
     };
 
     final data = {
-      'to': PreferenceUtils.getString(UserSettingKeys.partnertoken),
+      'to': PreferenceUtils.getString(PartnerSettingKeys.partnertoken),
       'notification': {
         'body': 'Your partner just updated their device status!',
         'content_available': true,
         'priority': 'high',
         'subtitle': '',
-        'title': 'Partner Device Status Update',
+        'title': 'Partner Device Update',
       },
       'data': {
         'priority': 'high',
@@ -68,11 +68,11 @@ class Notifications {
     } else {
       print('Failed to send POST request. Status code: ${response.statusCode}');
     }
-    return response.statusCode;
+    return jsonDecode(response.body);
   }
 
-  static Future<int> sendStolen() async {
-    final url = PreferenceUtils.getString(AppSettingsKeys.firebaseAPIURL);
+  static Future<Map<String, dynamic>> sendStolen() async {
+    final url = PreferenceUtils.getString(AppSettingsKeys.stolenNotificationEndpoint);
 
     final headers = {
       'Content-Type': 'application/json',
@@ -80,19 +80,19 @@ class Notifications {
     };
 
     final data = {
-      'to': PreferenceUtils.getString(UserSettingKeys.partnertoken),
+      'to': PreferenceUtils.getString(PartnerSettingKeys.partnertoken),
       'notification': {
         'body': 'Your partner just updated their device status!',
         'content_available': true,
         'priority': 'high',
         'subtitle': '',
-        'title': 'Partner Device Status Update',
+        'title': 'Partner Device Update',
       },
       'data': {
         'priority': 'high',
         'sound': 'app_sound.wav',
         'content_available': true,
-        'bodyText': 'Your partner just updated their device status!',
+        'bodyText': 'Your partner\'s device might be stolen!',
         'organization': PreferenceUtils.getString(UserSettingKeys.org),
       },
     };
@@ -107,6 +107,6 @@ class Notifications {
     } else {
       print('Failed to send POST request. Status code: ${response.statusCode}');
     }
-    return response.statusCode;
+    return jsonDecode(response.body);
   }
 }
