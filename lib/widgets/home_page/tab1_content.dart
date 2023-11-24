@@ -1,9 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:mobile_app/models/PreferenceUtils.dart';
 
 class Tab1Content extends StatefulWidget {
-  const Tab1Content({Key? key}) : super(key: key);
+  const Tab1Content({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -14,178 +16,149 @@ class _Tab1ContentState extends State<Tab1Content> {
   bool isRegistered = true;
   bool allPermissions = true;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: null,
-      body: SafeArea(
-        child: GridView.count(
-          crossAxisCount: 1,
-          padding: const EdgeInsets.all(16.0),
-          crossAxisSpacing: 16.0,
-          mainAxisSpacing: 16.0,
-          childAspectRatio: 3,
-          physics: const BouncingScrollPhysics(),
-          children: [
-            Visibility(
-              visible: true,
-              child: DashboardItem(
-                title: allPermissions
-                    ? 'Permissions up to Date'
-                    : 'Give Required Permissions',
-                icon: Icons.update,
-                onTap: () {},
-              ),
+  Widget _buildChildItem(String text, [IconData? icon]) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 16.0),
             ),
-            Visibility(
-              visible: true,
-              child: DashboardItem(
-                title: isRegistered
-                    ? 'Current Device Registered.'
-                    : 'Register This Device',
-                icon: Icons.device_hub,
-                onTap: () {},
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'Your IMEI',
-                icon: Icons.phone_android,
-                onTap: () {
-                  // Handle the tap for Your IMEI
-                  print('Tapped Your IMEI');
-                },
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'Internet Status',
-                icon: Icons.wifi,
-                onTap: () {},
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'Your IP Address',
-                icon: Icons.network_check,
-                onTap: () {
-                  // Handle the tap for Your IP
-                  print('Tapped Your IP');
-                },
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'Bluetooth Status',
-                icon: Icons.bluetooth,
-                onTap: () {},
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'MAC Address',
-                icon: Icons.devices,
-                onTap: () {},
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'Notifications',
-                icon: Icons.notifications,
-                onTap: () {
-                  // Handle the tap for Notification Daemon Status
-                  print('Tapped Notification Daemon Status');
-                },
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'Camera Access',
-                icon: Icons.camera_alt,
-                onTap: () {
-                  // Handle the tap for Camera Access
-                  print('Tapped Camera Access');
-                },
-              ),
-            ),
-            Visibility(
-              visible: isRegistered,
-              child: DashboardItem(
-                title: 'Location Access',
-                icon: Icons.location_on,
-                onTap: () {
-                  // Handle the tap for Location Access
-                  print('Tapped Location Access');
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+          if (icon != null) Icon(icon),
+        ],
       ),
     );
   }
-}
 
-class DashboardItem extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isEditable;
-  final String editableText;
-  final ValueChanged<String>? onTextEdited;
-
-  const DashboardItem({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-    this.isEditable = false,
-    this.editableText = '',
-    this.onTextEdited,
-    Key? key,
-  }) : super(key: key);
+  Widget _buildChildItemWithCopy(String text, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 16.0),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              _copyToClipboard(text);
+            },
+            child: const Text(
+              'Copy',
+              style: TextStyle(color: Colors.blue),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 2.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 48.0,
-              color: Colors.blue,
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('Permissions Overview'),
+                children: <Widget>[
+                  _buildChildItem('Camera Access'),
+                  _buildChildItem('Notifications Access'),
+                  _buildChildItem('Location Access'),
+                ],
+              ),
             ),
-            const SizedBox(width: 8.0),
-            isEditable
-                ? Expanded(
-                    child: TextField(
-                      controller: TextEditingController(text: editableText),
-                      onChanged: onTextEdited,
-                    ),
-                  )
-                : Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-          ],
-        ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('Partner Registration Status'),
+                children: <Widget>[
+                  _buildChildItem('Registered', Icons.redo_outlined),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('Device Connections Status'),
+                children: <Widget>[_buildChildItem('Internet', Icons.redo_outlined), _buildChildItem('Bluetooth')],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('IMEI'),
+                children: <Widget>[
+                  _buildChildItemWithCopy('IMEI', Icons.redo),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('Token'),
+                children: <Widget>[
+                  _buildChildItemWithCopy(PreferenceUtils.getString(UserSettingKeys.token), Icons.redo),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('IP Address'),
+                children: <Widget>[
+                  _buildChildItemWithCopy('IP', Icons.redo),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
+              child: ExpansionTile(
+                leading: const Icon(Icons.star),
+                title: const Text('MAC Address'),
+                children: <Widget>[
+                  _buildChildItemWithCopy('MAC', Icons.redo),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    // You can add a snackbar or any other feedback here to indicate that the text has been copied.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Copied to clipboard: $text'),
       ),
     );
   }
