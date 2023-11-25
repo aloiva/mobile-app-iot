@@ -37,7 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_blue: ^0.8.0
   firebase_core_platform_interface: ^5.0.0
-  http: ^1.1.0
+  http: ^0.13.3
   unique_identifier: ^0.3.0
   carrier_info: ^2.0.8
   device_imei: ^0.0.4+1
@@ -45,6 +45,10 @@ dependencies:
   shared_preferences: ^2.2.2
   firebase_core: ^2.23.0
   firebase_messaging: ^14.7.5
+  geolocator: ^10.1.0
+  network_info_plus: ^4.1.0
+  permission_handler: ^11.1.0
+  device_policy_manager: any
 
 dev_dependencies:
   flutter_test:

@@ -8,9 +8,12 @@ import 'package:mobile_app/screens/settings_page.dart'; // Replace with the actu
 // import 'package:mobile_app/models/app_config.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
 import 'package:mobile_app/services/notifications.dart';
+import 'package:mobile_app/services/checkPermissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+// import ''
+// import 'package:permission_handler/permission_handler.dart';
 
 SharedPreferences? globalPrefs;
 
@@ -24,6 +27,7 @@ void main() async {
   globalPrefs = await PreferenceUtils.init();
 
   await Notifications().init();
+  // PermissionHandler().initialize();
   await Future.delayed(const Duration(seconds: 1));
 
   // Initialize PreferenceUtils instance.
@@ -43,6 +47,7 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomePage(),
         '/settings': (context) => const SettingsPage(),
+        '/check_permissions': (context) => const MyPermissionScreen(),
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {

@@ -20,7 +20,7 @@ class Tab2Content extends StatefulWidget {
 }
 
 class _Tab2ContentState extends State<Tab2Content> {
-  bool isRegistered = true;
+  bool isRegistered = PreferenceUtils.getBool(UserSettingKeys.isdeviceregistered);
   String lastlocation = '';
   DateTime lastupdatedtime = DateTime.now();
   var updatestatus;
@@ -140,8 +140,10 @@ class _Tab2ContentState extends State<Tab2Content> {
                     PreferenceUtils.setString(PartnerSettingKeys.partnertoken, _tokenController.text);
                     _showSuccess(context, "registered.");
                     setState(() {
+                      // send registered data
+
                       // Toggle the boolean value
-                      isRegistered = !isRegistered;
+                      isRegistered = true;
                     });
                   }
                   print('Username: ${_usernameController.text}');
@@ -295,6 +297,13 @@ class _Tab2ContentState extends State<Tab2Content> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
+              _handletheft();
+            },
+            child: const Text('Send theft notification.'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
               setState(() {
                 // Toggle the boolean value
                 isRegistered = false;
@@ -396,8 +405,55 @@ class _Tab2ContentState extends State<Tab2Content> {
     } catch (error) {
       print('Error: $error');
     }
+    var statuscode = response["success"];
     setState(() {
-      updatestatus = response["success"] == true ? 'success' : 'failed. please check partner\'s token and re register';
+      updatestatus = (statuscode == 1) ? 'success' : 'failed. please check partner\'s token and re register';
+      lastupdatedtime = DateTime.now();
+      latitude = pos.latitude;
+      longitude = pos.longitude;
+      speed = pos.speed;
+      accuracy = pos.accuracy;
+      altitude = pos.altitude;
+      isyourlocloading = false;
+      isupdatestatusloading = false;
+    });
+  }
+
+  void _handletheft() async {
+    setState(() {
+      isupdatestatusloading = true;
+    });
+    var response = await Notifications.sendStolen();
+    // send the above data to location-endpoint.
+    var pos = await _determinePosition();
+    final String url = PreferenceUtils.getString(AppSettingsKeys.locationEndpoint);
+    final Map<String, dynamic> jsonData = {
+      'latitude': '${pos.latitude}',
+      'longitude': '${pos.longitude}',
+      'speed': '${pos.speed}',
+      'accuracy': '${pos.accuracy}',
+      'altitude': '${pos.altitude}'
+    };
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(jsonData),
+      );
+      if (response.statusCode == 200) {
+        print('Request successful');
+        print('Response: ${response.body}');
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+    var statuscode = response["success"];
+    setState(() {
+      updatestatus = (statuscode == 1) ? 'success' : 'failed. please check partner\'s token and re register';
       lastupdatedtime = DateTime.now();
       latitude = pos.latitude;
       longitude = pos.longitude;
