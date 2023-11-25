@@ -43,11 +43,11 @@ class Notifications {
     final data = {
       'to': PreferenceUtils.getString(PartnerSettingKeys.partnertoken),
       'notification': {
-        'body': 'Your partner just updated their device status!',
+        'body': 'Your partner just updated their device location status!',
         'content_available': true,
         'priority': 'high',
         'subtitle': '',
-        'title': 'Partner Device Update',
+        'title': 'Device Location Update',
       },
       'data': {
         'priority': 'high',
@@ -82,11 +82,11 @@ class Notifications {
     final data = {
       'to': PreferenceUtils.getString(PartnerSettingKeys.partnertoken),
       'notification': {
-        'body': 'Your partner just updated their device status!',
+        'body': 'More than 3 unlock attempts made on your partner\'s device, device might be stolen!',
         'content_available': true,
         'priority': 'high',
         'subtitle': '',
-        'title': 'Partner Device Update',
+        'title': 'Unlock Attempts Alert',
       },
       'data': {
         'priority': 'high',

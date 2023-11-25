@@ -25,6 +25,7 @@ class _Tab2ContentState extends State<Tab2Content> {
   DateTime lastupdatedtime = DateTime.now();
   var updatestatus;
   bool isupdatestatusloading = false;
+  bool istheftstatusloading = false;
   bool istheirlocloading = false;
   bool isyourlocloading = false;
 
@@ -261,7 +262,7 @@ class _Tab2ContentState extends State<Tab2Content> {
                 leading: const Icon(Icons.star),
                 title: const Text('Status of Your last Update'),
                 children: <Widget>[
-                  if (isupdatestatusloading)
+                  if (isupdatestatusloading || istheftstatusloading)
                     const LinearProgressIndicator(
                       backgroundColor: Colors.grey,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
@@ -295,12 +296,26 @@ class _Tab2ContentState extends State<Tab2Content> {
 
           // unregister button
           const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              _handletheft();
-            },
-            child: const Text('Send theft notification.'),
-          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton(
+              onPressed: () {
+                _handletheft();
+              },
+              child: const Text('Send theft notification.'),
+            ),
+            const SizedBox(width: 10),
+            if (istheftstatusloading) CircularProgressIndicator(),
+            // Container(
+            //   width: 20,
+            //   height: 20,
+            //   if (isupdatestatusloading) CircularProgressIndicator() ,
+            // decoration: BoxDecoration(
+            //   shape: BoxShape.circle,
+            //   color: isupdatestatusloading ? Colors.green : Colors.red,
+            // ),
+            // margin: const EdgeInsets.only(left: 5),
+          ]),
+
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
@@ -376,6 +391,7 @@ class _Tab2ContentState extends State<Tab2Content> {
   void _handleUpdate() async {
     setState(() {
       isupdatestatusloading = true;
+      isyourlocloading = true;
     });
     var response = await Notifications.sendUpdate();
     // send the above data to location-endpoint.
@@ -421,7 +437,8 @@ class _Tab2ContentState extends State<Tab2Content> {
 
   void _handletheft() async {
     setState(() {
-      isupdatestatusloading = true;
+      istheftstatusloading = true;
+      isyourlocloading = true;
     });
     var response = await Notifications.sendStolen();
     // send the above data to location-endpoint.
@@ -461,7 +478,7 @@ class _Tab2ContentState extends State<Tab2Content> {
       accuracy = pos.accuracy;
       altitude = pos.altitude;
       isyourlocloading = false;
-      isupdatestatusloading = false;
+      istheftstatusloading = false;
     });
   }
 
