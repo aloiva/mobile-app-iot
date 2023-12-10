@@ -45,11 +45,12 @@ class PreferenceUtils {
   }
 
   static void setDefaults() {
+    PreferenceUtils.setString(AppSettingsKeys.baseURL, "http://172.20.242.44:23456");
     PreferenceUtils.setString(AppSettingsKeys.loginEndPoint, 'https://httpbin.org/status/200');
     PreferenceUtils.setString(AppSettingsKeys.registerEndpoint, 'https://httpbin.org/status/200');
     PreferenceUtils.setString(AppSettingsKeys.locationEndpoint, 'https://httpbin.org/status/200');
-    PreferenceUtils.setString(AppSettingsKeys.imageEndpoint, 'https://httpbin.org/status/200');
     PreferenceUtils.setString(AppSettingsKeys.deviceRegisterEndpoint, 'https://httpbin.org/status/200');
+    PreferenceUtils.setString(AppSettingsKeys.deviceUnregisterEndpoint, 'https://httpbin.org/status/200');
     PreferenceUtils.setString(AppSettingsKeys.stolenNotificationEndpoint, 'https://fcm.googleapis.com/fcm/send');
     // PreferenceUtils.setString(PartnerSettingKeys.partnertoken,        'dviwN03aQFiVATEsAjhLlg:APA91bG8FUeLdoNN5C5giumJ2j01yq8KIJngmjUrtGQOKiVOM9b2Jkh7PVbxNdyY7zHJ5XiyPmCFFrG6Srk729kLnqpUqkmsig2A2O_jB0-u8xryhdazee9uV-EXawfqJGjaUNEPk1ue');
     PreferenceUtils.setString(AppSettingsKeys.authtoken,
@@ -64,10 +65,11 @@ class AppSettingsKeys {
   static String registerEndpoint = "registerEndpoint";
   static String deviceRegisterEndpoint = "deviceRegisterEndpoint";
   static String locationEndpoint = "locationEndpoint";
-  static String imageEndpoint = "imageEndpoint";
+  static String baseURL = "baseURL";
   static String stolenNotificationEndpoint = "stolennotificationEndpoint";
   static String updatedNotificationEndpoint = "updatednotificationendpoint";
   static String authtoken = 'authtoken';
+  static String deviceUnregisterEndpoint = "deviceUnregisterEndpoint";
   // Private constructor to prevent instantiation
   AppSettingsKeys._();
 }
