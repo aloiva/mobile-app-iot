@@ -11,8 +11,8 @@ class apiClient {
   // static const String baseUrl = "http://172.20.242.44:23456";
   static final String baseUrl = PreferenceUtils.getString(AppSettingsKeys.baseURL);
 
-  static Future<http.Response> getUser(String userID) async {
-    final response = await http.get(Uri.parse('$baseUrl/user/$userID'));
+  static Future<http.Response> getUser(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/user/$id'));
     return response;
   }
 
@@ -21,23 +21,23 @@ class apiClient {
     return _handleListResponse(response);
   }
 
-  static Future<http.Response> getUserLocation(String userID) async {
-    final response = await http.get(Uri.parse('$baseUrl/user/$userID/location'));
+  static Future<http.Response> getUserLocation(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/user/$id/location'));
     return response;
   }
 
-  static Future<http.Response> getUserPartner(String userID) async {
-    final response = await http.get(Uri.parse('$baseUrl/user/$userID/partner'));
+  static Future<http.Response> getUserPartner(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/user/$id/partner'));
     return response;
   }
 
-  static Future<http.Response> updateNotification(String userID) async {
-    final response = await http.post(Uri.parse('$baseUrl/user/$userID/notification/update'));
+  static Future<http.Response> updateNotification(String id) async {
+    final response = await http.post(Uri.parse('$baseUrl/user/$id/notification/update'));
     return response;
   }
 
-  static Future<http.Response> stolenNotification(String userID) async {
-    final response = await http.post(Uri.parse('$baseUrl/user/$userID/notification/stolen'));
+  static Future<http.Response> stolenNotification(String id) async {
+    final response = await http.post(Uri.parse('$baseUrl/user/$id/notification/stolen'));
     return response;
   }
 
@@ -52,6 +52,8 @@ class apiClient {
     userData["speed"] = "${pos.speed}";
     userData["accuracy"] = "${pos.accuracy}";
     userData["altitude"] = "${pos.altitude}";
+    PreferenceUtils.setString(UserSettingKeys.imei, userData["id"]);
+    PreferenceUtils.setString(UserSettingKeys.username, userData["username"]);
     final response = await http.post(
       Uri.parse('$baseUrl/user/register'),
       body: jsonEncode(userData),
@@ -71,6 +73,8 @@ class apiClient {
     userData["speed"] = "${pos.speed}";
     userData["accuracy"] = "${pos.accuracy}";
     userData["altitude"] = "${pos.altitude}";
+    PreferenceUtils.setString(UserSettingKeys.imei, userData["id"]);
+    PreferenceUtils.setString(UserSettingKeys.username, userData["username"]);
     final response = await http.post(
       Uri.parse('$baseUrl/user/login'),
       body: jsonEncode(userData),
@@ -79,26 +83,28 @@ class apiClient {
     return response;
   }
 
-  static Future<http.Response> deleteUser(String userID) async {
-    final response = await http.delete(Uri.parse('$baseUrl/user/$userID'));
+  static Future<http.Response> deleteUser(String id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/user/$id'));
     return response;
   }
 
-  static Future<http.Response> registerPartner(String userID, String partnerUsername, String partnerID) async {
+  static Future<http.Response> registerPartner(String id, String partnerUsername, String partnerID) async {
+    PreferenceUtils.setString(PartnerSettingKeys.partnerimei, partnerID);
+    PreferenceUtils.setString(PartnerSettingKeys.partnerusername, PartnerSettingKeys.partnerusername);
     final response = await http.put(
-      Uri.parse('$baseUrl/user/$userID/partner/register'),
+      Uri.parse('$baseUrl/user/$id/partner/register'),
       body: jsonEncode({'partnerusername': partnerUsername, 'partnerid': partnerID}),
       headers: {'Content-Type': 'application/json'},
     );
     return response;
   }
 
-  static Future<http.Response> unregisterPartner(String userID) async {
-    final response = await http.put(Uri.parse('$baseUrl/user/$userID/partner/unregister'));
+  static Future<http.Response> unregisterPartner(String id) async {
+    final response = await http.put(Uri.parse('$baseUrl/user/$id/partner/unregister'));
     return response;
   }
 
-  static Future<http.Response> updateLocation(String userID) async {
+  static Future<http.Response> updateLocation(String id) async {
     Position pos = await _determinePosition();
     var locationData = {
       'latitude': '${pos.latitude}',
@@ -108,7 +114,7 @@ class apiClient {
       'altitude': '${pos.altitude}'
     };
     final response = await http.put(
-      Uri.parse('$baseUrl/user/$userID/location'),
+      Uri.parse('$baseUrl/user/$id/location'),
       body: jsonEncode(locationData),
       headers: {'Content-Type': 'application/json'},
     );
