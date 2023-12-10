@@ -79,7 +79,7 @@ class _registerFormState extends State<registerForm> {
           context: context,
           builder: (BuildContext context) {
             return const AlertDialog(
-                title: Text('Logging in...'),
+                title: Text('Registering...'),
                 content: LinearProgressIndicator(
                   backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
@@ -142,7 +142,7 @@ class _registerFormState extends State<registerForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('register Succesful.'),
+          title: const Text('Registration Succesful.'),
           // content: const Text(''),
           actions: <Widget>[
             TextButton(
@@ -183,7 +183,7 @@ class _registerFormState extends State<registerForm> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('register Confirmation'),
-          content: const Text('Are you sure you want to log in?'),
+          content: const Text('Are you sure you want to register?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
