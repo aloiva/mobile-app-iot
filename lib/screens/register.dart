@@ -116,8 +116,8 @@ class _registerFormState extends State<registerForm> {
         const SizedBox(height: 16.0),
         TextField(
           controller: _idController,
-          obscureText: true,
-          decoration: const InputDecoration(labelText: 'id'),
+          obscureText: false,
+          decoration: const InputDecoration(labelText: 'IMEI'),
         ),
         const SizedBox(height: 16.0),
         const SizedBox(height: 16.0),
