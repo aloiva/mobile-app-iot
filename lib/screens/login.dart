@@ -1,10 +1,9 @@
 // ignore_for_file: deprecated_member_use, avoid_print, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'dart:convert';
-
+import 'package:mobile_app/services/apiClient.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
 // import 'package:mobile_app/screens/home_page.dart';
 // import 'package:mobile_app/models/app_config.dart';
@@ -69,19 +68,10 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  String selectedProvider = 'Jio';
+  final TextEditingController _idController = TextEditingController();
 
-  List<String> providerList = ['Jio', 'Airtel', 'Vi', 'Other'];
   void _login() async {
-    String apiUrl = PreferenceUtils.getString(AppSettingsKeys.loginEndPoint);
-
-    Map<String, String> credentials = {
-      'type': 'login',
-      'username': _usernameController.text,
-      'password': _passwordController.text,
-      'carrier': selectedProvider,
-    };
+    Map<String, String> credentials = {'username': _usernameController.text, 'id': _idController.text};
     String jsonString = jsonEncode(credentials);
     print(jsonString);
     try {
@@ -96,12 +86,8 @@ class _LoginFormState extends State<LoginForm> {
                 ));
           });
 
-      var response = await http.post(
-        Uri.parse(apiUrl),
-        body: jsonString,
-        headers: {'Content-Type': 'application/json'},
-      );
-      // Close the loading dialog
+      var response = await apiClient.loginUser(credentials);
+      print(response);
       Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
@@ -129,25 +115,11 @@ class _LoginFormState extends State<LoginForm> {
         ),
         const SizedBox(height: 16.0),
         TextField(
-          controller: _passwordController,
+          controller: _idController,
           obscureText: true,
-          decoration: const InputDecoration(labelText: 'Password'),
+          decoration: const InputDecoration(labelText: 'id'),
         ),
         const SizedBox(height: 16.0),
-        DropdownButton<String>(
-          value: selectedProvider,
-          onChanged: (String? newValue) {
-            setState(() {
-              selectedProvider = newValue!;
-            });
-          },
-          items: providerList.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
         const SizedBox(height: 16.0),
         ElevatedButton(
           onPressed: _checkConfirmation,
@@ -191,7 +163,7 @@ class _LoginFormState extends State<LoginForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Login failed. Please check your password.'),
+          title: const Text('Login failed. Please check your id.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

@@ -1,9 +1,12 @@
 // ignore_for_file: deprecated_member_use, avoid_print, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'package:mobile_app/services/apiClient.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
+// import 'package:mobile_app/screens/home_page.dart';
+// import 'package:mobile_app/models/app_config.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -17,7 +20,7 @@ class RegisterScreen extends StatelessWidget {
         return exit;
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Register'), automaticallyImplyLeading: false, actions: [
+        appBar: AppBar(title: const Text('register'), automaticallyImplyLeading: false, actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
@@ -28,7 +31,7 @@ class RegisterScreen extends StatelessWidget {
         ]),
         body: const Padding(
           padding: EdgeInsets.all(16.0),
-          child: RegisterForm(),
+          child: registerForm(),
         ),
       ),
     );
@@ -46,7 +49,7 @@ class RegisterScreen extends StatelessWidget {
             child: const Text('No'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => SystemNavigator.pop(),
             child: const Text('Yes'),
           ),
         ],
@@ -55,58 +58,41 @@ class RegisterScreen extends StatelessWidget {
   }
 }
 
-class RegisterForm extends StatefulWidget {
-  const RegisterForm({super.key});
+class registerForm extends StatefulWidget {
+  const registerForm({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _RegisterFormState createState() => _RegisterFormState();
+  _registerFormState createState() => _registerFormState();
 }
 
-class _RegisterFormState extends State<RegisterForm> {
+class _registerFormState extends State<registerForm> {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  String selectedProvider = 'Jio';
+  final TextEditingController _idController = TextEditingController();
 
-  List<String> providerList = ['Jio', 'Airtel', 'Vi', 'Other'];
-
-  // ignore: non_constant_identifier_names
-  void _Register() async {
-    String apiUrl = PreferenceUtils.getString(AppSettingsKeys.registerEndpoint);
-
-    Map<String, String> credentials = {
-      'type': 'register',
-      'username': _usernameController.text,
-      'password': _passwordController.text,
-      'carrier': selectedProvider,
-    };
+  void _register() async {
+    Map<String, String> credentials = {'username': _usernameController.text, 'id': _idController.text};
     String jsonString = jsonEncode(credentials);
     print(jsonString);
     try {
       showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return const AlertDialog(
-              title: Text('Registering...'),
-              content: LinearProgressIndicator(
-                backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
-              ));
-        },
-      );
+          context: context,
+          builder: (BuildContext context) {
+            return const AlertDialog(
+                title: Text('Logging in...'),
+                content: LinearProgressIndicator(
+                  backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
+                ));
+          });
 
-      var response = await http.post(
-        Uri.parse(apiUrl),
-        body: jsonString,
-        headers: {'Content-Type': 'application/json'},
-      );
-      // Close the loading dialog
+      var response = await apiClient.registerUser(credentials);
+      print(response);
       Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
         PreferenceUtils.setBool(UserSettingKeys.isloggedin, true);
         print(PreferenceUtils.getBool(UserSettingKeys.isloggedin));
-
         _showSuccess();
       } else {
         _showFailure();
@@ -129,29 +115,15 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 16.0),
         TextField(
-          controller: _passwordController,
+          controller: _idController,
           obscureText: true,
-          decoration: const InputDecoration(labelText: 'Password'),
+          decoration: const InputDecoration(labelText: 'id'),
         ),
         const SizedBox(height: 16.0),
-        DropdownButton<String>(
-          value: selectedProvider,
-          onChanged: (String? newValue) {
-            setState(() {
-              selectedProvider = newValue!;
-            });
-          },
-          items: providerList.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
         const SizedBox(height: 16.0),
         ElevatedButton(
           onPressed: _checkConfirmation,
-          child: const Text('Register'),
+          child: const Text('register'),
         ),
         const SizedBox(height: 8.0), // Add some spacing
         TextButton(
@@ -159,7 +131,7 @@ class _RegisterFormState extends State<RegisterForm> {
             // Navigate to the registration route
             Navigator.pushNamed(context, '/login');
           },
-          child: const Text("Existing user? Login here."),
+          child: const Text("New user? login here."),
         ),
       ],
     );
@@ -170,8 +142,8 @@ class _RegisterFormState extends State<RegisterForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Registration successful.'),
-          content: const Text('You will be logged in now.'),
+          title: const Text('register Succesful.'),
+          // content: const Text(''),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -191,8 +163,7 @@ class _RegisterFormState extends State<RegisterForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(''),
-          content: const Text('Registering failed. Please try again.'),
+          title: const Text('register failed. Please check your id.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -211,8 +182,8 @@ class _RegisterFormState extends State<RegisterForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Register Confirmation'),
-          content: const Text('Are you sure you want to register?'),
+          title: const Text('register Confirmation'),
+          content: const Text('Are you sure you want to log in?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -221,7 +192,7 @@ class _RegisterFormState extends State<RegisterForm> {
               child: const Text('No'),
             ),
             TextButton(
-              onPressed: _Register,
+              onPressed: _register,
               child: const Text('Yes'),
             ),
           ],
