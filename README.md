@@ -1,16 +1,10 @@
 # mobile_app
 
-A new Flutter project.
+made for iot course - final year.
 
-## Getting Started
+- works with any backend but used blockchain here for demo.
+- front end for a theft identification when connected to internet.
+- register a partner after login for every user.
+- has functionality for location retrieval of the device, and sends it to an endpoint.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+read code to configure end points.
