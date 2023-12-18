@@ -4,10 +4,11 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
 import 'dart:async';
-import 'package:http/http.dart' as http;
+import 'package:mobile_app/services/apiClient.dart';
 
 class Notifications {
   final _firebase = FirebaseMessaging.instance;
+  static final id = PreferenceUtils.getString(UserSettingKeys.imei);
 
   Future<void> init() async {
     await _firebase.requestPermission();
@@ -15,54 +16,10 @@ class Notifications {
     print('token: {$token}');
     // update your token in settings:
     PreferenceUtils.setString(UserSettingKeys.token, token.toString());
-    // _firebase.configure(
-    //   onMessage: (Map<String, dynamic> message) async {
-    //     print("onMessage: $message");
-    //     // Handle the incoming message when the app is in the foreground
-    //     // You can show a local notification or update the UI here
-    //   },
-    //   onLaunch: (Map<String, dynamic> message) async {
-    //     print("onLaunch: $message");
-    //     // Handle the incoming message when the app is launched from terminated state
-    //   },
-    //   onResume: (Map<String, dynamic> message) async {
-    //     print("onResume: $message");
-    //     // Handle the incoming message when the app is resumed from the background
-    //   },
-    // );
   }
 
   static Future<Map<String, dynamic>> sendUpdate() async {
-    final url = PreferenceUtils.getString(AppSettingsKeys.updatedNotificationEndpoint);
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'key=${PreferenceUtils.getString(AppSettingsKeys.authtoken)}',
-    };
-
-    final data = {
-      'to': PreferenceUtils.getString(PartnerSettingKeys.partnertoken),
-      'notification': {
-        'body': 'Your partner just updated their device location status!',
-        'content_available': true,
-        'priority': 'high',
-        'subtitle': '',
-        'title': 'Device Location Update',
-      },
-      'data': {
-        'priority': 'high',
-        'sound': 'app_sound.wav',
-        'content_available': true,
-        'bodyText': 'Your partner just updated their device status!',
-        'organization': PreferenceUtils.getString(UserSettingKeys.org),
-      },
-    };
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(data),
-    );
+    final response = await apiClient.updateNotification(id);
     if (response.statusCode == 200) {
       print('POST request successful: ${response.body}');
     } else {
@@ -72,36 +29,7 @@ class Notifications {
   }
 
   static Future<Map<String, dynamic>> sendStolen() async {
-    final url = PreferenceUtils.getString(AppSettingsKeys.stolenNotificationEndpoint);
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'key=${PreferenceUtils.getString(AppSettingsKeys.authtoken)}',
-    };
-
-    final data = {
-      'to': PreferenceUtils.getString(PartnerSettingKeys.partnertoken),
-      'notification': {
-        'body': 'More than 3 unlock attempts made on your partner\'s device, device might be stolen!',
-        'content_available': true,
-        'priority': 'high',
-        'subtitle': '',
-        'title': 'Unlock Attempts Alert',
-      },
-      'data': {
-        'priority': 'high',
-        'sound': 'app_sound.wav',
-        'content_available': true,
-        'bodyText': 'Your partner\'s device might be stolen!',
-        'organization': PreferenceUtils.getString(UserSettingKeys.org),
-      },
-    };
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(data),
-    );
+    final response = await apiClient.stolenNotification(id);
     if (response.statusCode == 200) {
       print('POST request successful: ${response.body}');
     } else {

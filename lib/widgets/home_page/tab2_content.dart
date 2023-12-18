@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -7,9 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:mobile_app/models/PreferenceUtils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobile_app/services/notifications.dart';
-// import 'dart:async';
-// import 'package:mobile_app/services/notifications.dart';
-// import 'package:http/http.dart' as http;
+import 'package:mobile_app/services/apiClient.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Tab2Content extends StatefulWidget {
   const Tab2Content({super.key});
@@ -21,49 +20,34 @@ class Tab2Content extends StatefulWidget {
 
 class _Tab2ContentState extends State<Tab2Content> {
   bool isRegistered = PreferenceUtils.getBool(UserSettingKeys.isdeviceregistered);
-  String lastlocation = '';
   DateTime lastupdatedtime = DateTime.now();
-  var updatestatus;
-  bool isupdatestatusloading = false;
-  bool istheftstatusloading = false;
-  bool istheirlocloading = false;
-  bool isyourlocloading = false;
+  var lastnotificationstatus;
 
-  // your location details
-  var latitude = null, longitude = null, speed = null, accuracy = null, altitude = null;
+  //////////
+  String partnerusername = "null", partnerid = "null";
+
+  var lat = "null", long = "null", speed = "null", acc = "null", alt = "null";
 
   // partner location details
-  var olat = null, olon = null, ospeed = null, oacc = null, oalt = null;
+  var olat = "null", olon = "null", ospeed = "null", oacc = "null", oalt = "null";
+
+  bool isgetyourlocloading = false;
+  bool isgettheirlocloading = false;
+
+  bool isupdatelocloading = false;
+  bool isupdatenotifloading = false;
+  bool istheftnotifloading = false;
 
   @override
   void initState() {
     super.initState();
     setState(() {
       isRegistered = PreferenceUtils.getBool(UserSettingKeys.isdeviceregistered);
-      // isRegistered = true;
     });
   }
 
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _tokenController = TextEditingController();
   final TextEditingController _imeiController = TextEditingController();
-
-  Widget _buildChildItem(String text, [IconData? icon]) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 16.0),
-            ),
-          ),
-          if (icon != null) Icon(icon),
-        ],
-      ),
-    );
-  }
 
   Widget _buildChildItemWithCopy(String text, [IconData? icon]) {
     return Padding(
@@ -111,46 +95,19 @@ class _Tab2ContentState extends State<Tab2Content> {
               ),
               const SizedBox(height: 16.0),
               TextFormField(
-                controller: _tokenController,
-                decoration: const InputDecoration(labelText: 'Partner Device\'s token'),
+                controller: _imeiController,
+                decoration: const InputDecoration(labelText: 'Partner Device\'s IMEI'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter their token';
+                    return 'Please enter their IMEI';
                   }
-                  // Add additional token validation logic if needed
                   return null;
                 },
               ),
               const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _imeiController,
-                decoration: const InputDecoration(labelText: 'Partner Device\'s IMEI (optional)'),
-                // No validator for optional field
-              ),
-              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () {
-                  // Validate the form
-                  // Perform registration or submission logic here
-                  // Access the input values using _usernameController.text, _tokenController.text, _imeiController.text
-                  if (_usernameController.text.isEmpty || _tokenController.text.isEmpty) {
-                    _showAlertDialog(context);
-                  } else {
-                    PreferenceUtils.setBool(UserSettingKeys.isdeviceregistered, true);
-                    PreferenceUtils.setString(PartnerSettingKeys.partnerusername, _usernameController.text);
-                    PreferenceUtils.setString(PartnerSettingKeys.partnertoken, _tokenController.text);
-                    _showSuccess(context, "registered.");
-                    setState(() {
-                      // send registered data
-
-                      // Toggle the boolean value
-                      isRegistered = true;
-                    });
-                  }
-                  print('Username: ${_usernameController.text}');
-                  print('token: ${_tokenController.text}');
-                  print('Optional Field: ${_imeiController.text}');
-                  print(isRegistered);
+                  _showRegistrationConfirmationDialog();
                 },
                 child: const Text('Register as your partner\'s device'),
               ),
@@ -176,8 +133,8 @@ class _Tab2ContentState extends State<Tab2Content> {
                 leading: const Icon(Icons.star),
                 title: const Text('Your partner\'s device details'),
                 children: <Widget>[
-                  _buildChildItemWithCopy('Username: ${PreferenceUtils.getString(PartnerSettingKeys.partnerusername)}'),
-                  _buildChildItemWithCopy('Token: ${PreferenceUtils.getString(PartnerSettingKeys.partnertoken)}'),
+                  _buildChildItemWithCopy('Username: $partnerusername'),
+                  _buildChildItemWithCopy('IMEI: $partnerid'),
                 ],
               ),
             ),
@@ -192,7 +149,7 @@ class _Tab2ContentState extends State<Tab2Content> {
                 leading: const Icon(Icons.star),
                 title: const Text('Your partner\'s last location'),
                 children: <Widget>[
-                  if (istheirlocloading)
+                  if (isgettheirlocloading)
                     const LinearProgressIndicator(
                       backgroundColor: Colors.grey,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
@@ -210,12 +167,12 @@ class _Tab2ContentState extends State<Tab2Content> {
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               onPressed: () {
-                _handleTheirLocation();
+                _getPartnerLoc();
               },
-              child: const Text('Update Partner\'s last location.'),
+              child: const Text('Get Partner\'s last location.'),
             ),
             const SizedBox(width: 10),
-            if (istheirlocloading) CircularProgressIndicator(),
+            if (isgettheirlocloading) const CircularProgressIndicator(),
           ]),
 
           // your last location
@@ -225,18 +182,18 @@ class _Tab2ContentState extends State<Tab2Content> {
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
               child: ExpansionTile(
                 leading: const Icon(Icons.star),
-                title: const Text('Your last location'),
+                title: const Text('Your last location as per your partner'),
                 children: <Widget>[
-                  if (isyourlocloading)
+                  if (isgetyourlocloading)
                     const LinearProgressIndicator(
                       backgroundColor: Colors.grey,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                     ),
-                  _buildChildItemWithCopy('Latitude: $latitude'),
-                  _buildChildItemWithCopy('Longitude: $longitude'),
-                  _buildChildItemWithCopy('Altitude: $altitude'),
+                  _buildChildItemWithCopy('Latitude: $lat'),
+                  _buildChildItemWithCopy('Longitude: $long'),
+                  _buildChildItemWithCopy('Altitude: $alt'),
                   _buildChildItemWithCopy('Speed: $speed'),
-                  _buildChildItemWithCopy('Accuracy: $accuracy'),
+                  _buildChildItemWithCopy('Accuracy: $acc'),
                 ],
               ),
             ),
@@ -245,12 +202,12 @@ class _Tab2ContentState extends State<Tab2Content> {
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               onPressed: () {
-                _handleYourLoc();
+                _getYourLoc();
               },
-              child: const Text('Update your location'),
+              child: const Text('Get your last location.'),
             ),
             const SizedBox(width: 10),
-            if (isyourlocloading) CircularProgressIndicator(),
+            if (isgetyourlocloading) const CircularProgressIndicator(),
           ]),
 
           // status of last update
@@ -260,69 +217,63 @@ class _Tab2ContentState extends State<Tab2Content> {
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
               child: ExpansionTile(
                 leading: const Icon(Icons.star),
-                title: const Text('Status of Your last Update'),
+                title: const Text('Last update and notification status'),
                 children: <Widget>[
-                  if (isupdatestatusloading || istheftstatusloading)
+                  if (isupdatenotifloading || istheftnotifloading || isupdatelocloading)
                     const LinearProgressIndicator(
                       backgroundColor: Colors.grey,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                     ),
-                  _buildChildItemWithCopy('Last updated: $lastupdatedtime'),
-                  _buildChildItemWithCopy('status: $updatestatus'),
+                  _buildChildItemWithCopy('Last updated location on network: $lastupdatedtime'),
+                  _buildChildItemWithCopy('Last sent notification status: $lastnotificationstatus'),
                 ],
               ),
             ),
           ),
+
+          // update location on server
           const SizedBox(height: 10),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               onPressed: () {
-                _handleUpdate();
+                _handleUpdateLocation();
               },
-              child: const Text('Send update to your Partner'),
+              child: const Text('Update your last location to fabric.'),
             ),
             const SizedBox(width: 10),
-            if (isupdatestatusloading) CircularProgressIndicator(),
-            // Container(
-            //   width: 20,
-            //   height: 20,
-            //   if (isupdatestatusloading) CircularProgressIndicator() ,
-            // decoration: BoxDecoration(
-            //   shape: BoxShape.circle,
-            //   color: isupdatestatusloading ? Colors.green : Colors.red,
-            // ),
-            // margin: const EdgeInsets.only(left: 5),
+            if (isupdatelocloading) const CircularProgressIndicator(),
           ]),
 
-          // unregister button
+          // update notification
           const SizedBox(height: 10),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               onPressed: () {
-                _handletheft();
+                _handleUpdateNotif();
               },
-              child: const Text('Send theft notification.'),
+              child: const Text('Send update notification to partner.'),
             ),
             const SizedBox(width: 10),
-            if (istheftstatusloading) CircularProgressIndicator(),
-            // Container(
-            //   width: 20,
-            //   height: 20,
-            //   if (isupdatestatusloading) CircularProgressIndicator() ,
-            // decoration: BoxDecoration(
-            //   shape: BoxShape.circle,
-            //   color: isupdatestatusloading ? Colors.green : Colors.red,
-            // ),
-            // margin: const EdgeInsets.only(left: 5),
+            if (isupdatenotifloading) const CircularProgressIndicator(),
+          ]),
+
+          // theft notification button
+          const SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton(
+              onPressed: () {
+                _handleTheftNotif();
+              },
+              child: const Text('Send theft notification to partner.'),
+            ),
+            const SizedBox(width: 10),
+            if (istheftnotifloading) const CircularProgressIndicator(),
           ]),
 
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
-              setState(() {
-                // Toggle the boolean value
-                isRegistered = false;
-              });
+              _showUnregisterConfirmationDialog();
             },
             child: const Text('Unregister this Partner.'),
           ),
@@ -359,25 +310,6 @@ class _Tab2ContentState extends State<Tab2Content> {
     );
   }
 
-  void _showSuccess(BuildContext context, String text) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Successfully $text'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Okay'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     // You can add a snackbar or any other feedback here to indicate that the text has been copied.
@@ -386,100 +318,6 @@ class _Tab2ContentState extends State<Tab2Content> {
         content: Text('Copied to clipboard: $text'),
       ),
     );
-  }
-
-  void _handleUpdate() async {
-    setState(() {
-      isupdatestatusloading = true;
-      isyourlocloading = true;
-    });
-    var response = await Notifications.sendUpdate();
-    // send the above data to location-endpoint.
-    var pos = await _determinePosition();
-    final String url = PreferenceUtils.getString(AppSettingsKeys.locationEndpoint);
-    final Map<String, dynamic> jsonData = {
-      'latitude': '${pos.latitude}',
-      'longitude': '${pos.longitude}',
-      'speed': '${pos.speed}',
-      'accuracy': '${pos.accuracy}',
-      'altitude': '${pos.altitude}'
-    };
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(jsonData),
-      );
-      if (response.statusCode == 200) {
-        print('Request successful');
-        print('Response: ${response.body}');
-      } else {
-        print('Request failed with status: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error: $error');
-    }
-    var statuscode = response["success"];
-    setState(() {
-      updatestatus = (statuscode == 1) ? 'success' : 'failed. please check partner\'s token and re register';
-      lastupdatedtime = DateTime.now();
-      latitude = pos.latitude;
-      longitude = pos.longitude;
-      speed = pos.speed;
-      accuracy = pos.accuracy;
-      altitude = pos.altitude;
-      isyourlocloading = false;
-      isupdatestatusloading = false;
-    });
-  }
-
-  void _handletheft() async {
-    setState(() {
-      istheftstatusloading = true;
-      isyourlocloading = true;
-    });
-    var response = await Notifications.sendStolen();
-    // send the above data to location-endpoint.
-    var pos = await _determinePosition();
-    final String url = PreferenceUtils.getString(AppSettingsKeys.locationEndpoint);
-    final Map<String, dynamic> jsonData = {
-      'latitude': '${pos.latitude}',
-      'longitude': '${pos.longitude}',
-      'speed': '${pos.speed}',
-      'accuracy': '${pos.accuracy}',
-      'altitude': '${pos.altitude}'
-    };
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(jsonData),
-      );
-      if (response.statusCode == 200) {
-        print('Request successful');
-        print('Response: ${response.body}');
-      } else {
-        print('Request failed with status: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error: $error');
-    }
-    var statuscode = response["success"];
-    setState(() {
-      updatestatus = (statuscode == 1) ? 'success' : 'failed. please check partner\'s token and re register';
-      lastupdatedtime = DateTime.now();
-      latitude = pos.latitude;
-      longitude = pos.longitude;
-      speed = pos.speed;
-      accuracy = pos.accuracy;
-      altitude = pos.altitude;
-      isyourlocloading = false;
-      istheftstatusloading = false;
-    });
   }
 
   Future<Position> _determinePosition() async {
@@ -518,21 +356,289 @@ class _Tab2ContentState extends State<Tab2Content> {
     return await Geolocator.getCurrentPosition();
   }
 
-  void _handleTheirLocation() {}
-
-  void _handleYourLoc() async {
+  void _getPartnerLoc() async {
     setState(() {
-      isyourlocloading = true;
+      isgettheirlocloading = true;
     });
-    var pos = await _determinePosition();
-
+    try {
+      final response = await apiClient.getUserLocation(PreferenceUtils.getString(PartnerSettingKeys.partnerimei));
+      if (response.statusCode == 200) {
+        print('Request successful');
+        print('Response: ${response.body}');
+        var pos = jsonDecode(response.body);
+        setState(() {
+          olat = pos["latitude"];
+          olon = pos["longitude"];
+          oalt = pos["altitude"];
+          oacc = pos["accuracy"];
+          ospeed = pos["speed"];
+        });
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
     setState(() {
-      latitude = pos.latitude;
-      longitude = pos.longitude;
-      speed = pos.speed;
-      accuracy = pos.accuracy;
-      altitude = pos.altitude;
-      isyourlocloading = false;
+      isgettheirlocloading = false;
     });
+  }
+
+  void _getYourLoc() async {
+    setState(() {
+      isgetyourlocloading = true;
+    });
+    try {
+      final response = await apiClient.getUserLocation(PreferenceUtils.getString(UserSettingKeys.imei));
+      if (response.statusCode == 200) {
+        print('Request successful');
+        print('Response: ${response.body}');
+        var pos = jsonDecode(response.body);
+        setState(() {
+          lat = pos["latitude"];
+          long = pos["longitude"];
+          alt = pos["altitude"];
+          acc = pos["accuracy"];
+          speed = pos["speed"];
+        });
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+    setState(() {
+      isgetyourlocloading = false;
+    });
+  }
+
+  void _handleUpdateLocation() async {
+    setState(() {
+      isupdatelocloading = true;
+    });
+    try {
+      final response = await apiClient.updateLocation(PreferenceUtils.getString(UserSettingKeys.imei));
+      if (response.statusCode == 200) {
+        print('Request successful');
+        print('Response: ${response.body}');
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+    setState(() {
+      isupdatelocloading = false;
+      lastupdatedtime = DateTime.now();
+    });
+  }
+
+  void _handleUpdateNotif() async {
+    setState(() {
+      isupdatenotifloading = true;
+    });
+    try {
+      final response = await apiClient.updateNotification(PreferenceUtils.getString(UserSettingKeys.imei));
+      if (response.statusCode == 200) {
+        print('Request successful');
+        print('Response: ${response.body}');
+        setState(() {
+          lastnotificationstatus = response.statusCode;
+        });
+      } else {
+        setState(() {
+          lastnotificationstatus = response.statusCode;
+        });
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+    setState(() {
+      isupdatenotifloading = false;
+    });
+  }
+
+  void _handleTheftNotif() async {
+    setState(() {
+      istheftnotifloading = true;
+    });
+    try {
+      final response = await apiClient.stolenNotification(PreferenceUtils.getString(UserSettingKeys.imei));
+      if (response.statusCode == 200) {
+        print('Request successful');
+        print('Response: ${response.body}');
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+    setState(() {
+      istheftnotifloading = false;
+    });
+  }
+
+  void _showUnregisterConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Partner unregistration confirmation'),
+          content: const Text('Are you sure you want to unregister this partner?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                _unregisterPartner();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _unregisterPartner() async {
+    try {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return const AlertDialog(
+                title: Text('Unregistering partner...'),
+                content: LinearProgressIndicator(
+                  backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
+                ));
+          });
+      var id = PreferenceUtils.getString(UserSettingKeys.imei);
+      var response = await apiClient.unregisterPartner(id);
+      print(response);
+      Navigator.of(context).pop();
+
+      if (response.statusCode == 200) {
+        PreferenceUtils.setBool(UserSettingKeys.isdeviceregistered, false);
+        setState(() {
+          isRegistered = false;
+        });
+        _showSuccess(context, "unregistered partner");
+      } else {
+        _showFailure(context, "unregister partner");
+      }
+    } catch (error) {
+      // Close the loading dialog in case of an error
+      Navigator.of(context).pop();
+      print('Error sending data: $error');
+    }
+  }
+
+  void _showRegistrationConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Partner registration confirmation'),
+          content: const Text('Are you sure you want to register this partner?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                _registerPartner();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _registerPartner() async {
+    try {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return const AlertDialog(
+                title: Text('Registering partner...'),
+                content: LinearProgressIndicator(
+                  backgroundColor: Color.fromARGB(2, 91, 9, 9), // Set background color
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Set progress color
+                ));
+          });
+      var id = PreferenceUtils.getString(UserSettingKeys.imei);
+      setState(() {
+        partnerusername = _usernameController.text;
+        partnerid = _imeiController.text;
+      });
+      var response = await apiClient.registerPartner(id, partnerusername, partnerid);
+      print(response);
+      Navigator.of(context).pop();
+
+      if (response.statusCode == 200) {
+        PreferenceUtils.setBool(UserSettingKeys.isdeviceregistered, true);
+        setState(() {
+          isRegistered = true;
+        });
+        _showSuccess(context, "registered partner");
+      } else {
+        _showFailure(context, "register partner");
+      }
+    } catch (error) {
+      // Close the loading dialog in case of an error
+      Navigator.of(context).pop();
+      print('Error sending data: $error');
+    }
+  }
+
+  void _showSuccess(BuildContext context, String text) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Successfully $text'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Okay'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showFailure(BuildContext context, String text) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Failed to $text'),
+          content: const Text('Check entered details, or try again in a while.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Okay'),
+            )
+          ],
+        );
+      },
+    );
   }
 }

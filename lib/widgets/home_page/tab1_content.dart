@@ -106,30 +106,6 @@ class _Tab1ContentState extends State<Tab1Content> {
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
               child: ExpansionTile(
                 leading: const Icon(Icons.star),
-                title: const Text('Device Connections Status'),
-                children: <Widget>[_buildChildItem('Internet', Icons.redo_outlined), _buildChildItem('Bluetooth')],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
-              child: ExpansionTile(
-                leading: const Icon(Icons.star),
-                title: const Text('IMEI'),
-                children: <Widget>[
-                  _buildChildItemWithCopy('IMEI', Icons.redo),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
-              child: ExpansionTile(
-                leading: const Icon(Icons.star),
                 title: const Text('Token'),
                 children: <Widget>[
                   _buildChildItemWithCopy(PreferenceUtils.getString(UserSettingKeys.token), Icons.redo),
@@ -143,9 +119,9 @@ class _Tab1ContentState extends State<Tab1Content> {
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
               child: ExpansionTile(
                 leading: const Icon(Icons.star),
-                title: const Text('IP Address'),
+                title: const Text('Username'),
                 children: <Widget>[
-                  _buildChildItemWithCopy('IP', Icons.redo),
+                  _buildChildItemWithCopy(PreferenceUtils.getString(UserSettingKeys.username), Icons.redo),
                 ],
               ),
             ),
@@ -156,9 +132,9 @@ class _Tab1ContentState extends State<Tab1Content> {
               padding: const EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0, bottom: 0.0),
               child: ExpansionTile(
                 leading: const Icon(Icons.star),
-                title: const Text('MAC Address'),
+                title: const Text('IMEI'),
                 children: <Widget>[
-                  _buildChildItemWithCopy('MAC', Icons.redo),
+                  _buildChildItemWithCopy(PreferenceUtils.getString(UserSettingKeys.imei), Icons.redo),
                 ],
               ),
             ),
